@@ -1,7 +1,7 @@
-            //---------------------------------***********************--------------------------------------||
-            //                                  NAME: MD NAHID HASAN                                        ||
-            //                                    ID: B190305020                                            ||
-            //--------------------------------************************--------------------------------------||
+//---------------------------------***********************--------------------------------------||
+//                                  NAME: MD NAHID HASAN                                        ||
+//                                    ID: B190305020                                            ||
+//--------------------------------************************--------------------------------------||
 
 #include <iostream>
 #include <fstream>
@@ -15,10 +15,12 @@ using namespace std;
 class lib
 {
 public:
-    string book_id, book_name, book_auth;
+    string book_id, book_name, book_auth, Available;
     string student_id, student_name;
     string record_issue, return_date;
+    string librarian_username, librarian_password;
     void get();
+
     void student();
     void librarian();
     void add();
@@ -29,6 +31,8 @@ public:
     void issue_book();
     void getstudent();
     void view_issue();
+    void get_password();
+    void ck_password();
 };
 
 void lib ::get()
@@ -45,7 +49,16 @@ void lib ::get()
     }
     else if (i == 2)
     {
-        librarian();
+        ifstream file;
+        file.open("Password.txt");
+        if (file)
+        {
+            ck_password();
+        }
+        else
+        {
+            get_password();
+        }
     }
     else if (i == 3)
     {
@@ -141,10 +154,10 @@ void lib ::booklist()
     else
     {
         cout << "\n\t    ************ Book List ************ \n\n";
-        cout << "\n\t\tBook Id\t\tBook Name\t\tBook Auth\n";
+        cout << "\n\t\tBook Id\t\tBook Name\t\tBook Auth\t\tAvailable\n";
         while (fbin.read((char *)this, sizeof(*this)))
         {
-            cout << "\t\t" << book_id << "\t\t" << book_name << "\t\t\t" << book_auth << endl;
+            cout << "\t\t" << book_id << "\t\t" << book_name << "\t\t\t" << book_auth<<"\t\t\t" << Available << endl;
         }
         fbin.close();
     }
@@ -158,7 +171,7 @@ void lib ::booklist()
     }
     else if (i == 2)
     {
-        librarian();
+        ck_password();
     }
     else if (i == 3)
     {
@@ -167,6 +180,7 @@ void lib ::booklist()
 }
 void lib ::add()
 {
+    char n;
     system("cls");
     cout << "\n\t************ ADD NEW BOOK ************\n";
     cout << "\n\t\tEnter Book's ID : ";
@@ -175,6 +189,16 @@ void lib ::add()
     cin >> book_name;
     cout << "\n\t\tEnter Author's Name : ";
     cin >> book_auth;
+    cout << "\n\t\tIf The Books Available(y/n): ";
+    cin >> n;
+    if (n == 'y' || n == 'Y')
+    {
+        Available = "Yes";
+    }
+    else
+    {
+        Available = "No";
+    }
     ofstream fbout("Books.txt", ios::binary | ios::out | ios::app);
     if (!fbout)
     {
@@ -275,7 +299,7 @@ void lib ::search()
     }
     else if (i == 2)
     {
-        librarian();
+        ck_password();
     }
     else if (i == 3)
     {
@@ -579,18 +603,60 @@ void lib ::view_issue()
         exit(0);
     }
 }
+void lib ::get_password()
+{
+    ofstream fbin("Password.txt", ios::binary);
+    cout << "\n\t    ************ Create Account ************ \n\n";
+    cout << "\n\t\tEnter your username: ";
+    cin >> librarian_username;
+    cout << "\n\t\tEnter new password: ";
+    cin >> librarian_password;
+    fbin.write((char *)this, sizeof(*this));
+    fbin.close();
+    cout << "\n\t\tSuccessfully add account.\n";
+    get();
+}
+void lib::ck_password()
+{
+    ifstream fbout("Password.txt", ios::binary);
+    int c = 0;
+    string name, pass;
+    cout << "\n\t    ************ LogIn ************ \n\n";
+    cout << "\n\t\tEnter your username: ";
+    cin >> name;
+    cout << "\n\t\tEnter your password: ";
+    cin >> pass;
+    while (fbout.read((char *)this, sizeof(*this)))
+    {
+        if ((librarian_username == name) && (librarian_password == pass))
+        {
+            librarian();
+            c = 1;
+        }
+    }
+    fbout.close();
+    if (c != 1)
+    {
+        cout << "\n\t\tIncorrect Username or Password.\n";
+        get();
+        system("cls");
+    }
+}
+
 int main()
 {
     lib obj;
+    obj.get();
     //obj.view_issue();
     //obj.issue_book();
-    obj.get();
     //obj.getstudent();
     //obj.add();
     //obj.booklist();
     //obj.search();
     //obj.modify();
     //obj.Delete();
+    //obj.get_password();
+    //obj.ck_password();
     getch();
     return 0;
 }
